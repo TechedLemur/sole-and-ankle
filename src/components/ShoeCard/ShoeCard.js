@@ -1,9 +1,20 @@
-import React from 'react';
-import styled from 'styled-components/macro';
+import React from "react";
+import styled from "styled-components/macro";
 
-import { COLORS, WEIGHTS } from '../../constants';
-import { formatPrice, pluralize, isNewShoe } from '../../utils';
-import Spacer from '../Spacer';
+import { COLORS, WEIGHTS } from "../../constants";
+import { formatPrice, pluralize, isNewShoe } from "../../utils";
+import Spacer from "../Spacer";
+
+const STYLES = {
+  "on-sale": {
+    bgcolor: COLORS.primary,
+    children: "Sale",
+  },
+  "new-release": {
+    bgcolor: COLORS.secondary,
+    children: "Just Released!",
+  },
+};
 
 const ShoeCard = ({
   slug,
@@ -31,19 +42,29 @@ const ShoeCard = ({
       ? 'new-release'
       : 'default'
 
+  const PriceTag = variant === "on-sale" ? OldPrice : Price;
+
   return (
     <Link href={`/shoe/${slug}`}>
       <Wrapper>
         <ImageWrapper>
           <Image alt="" src={imageSrc} />
+          {variant !== "default" && (
+            <Flag bgcolor={STYLES[variant].bgcolor}>
+              {STYLES[variant].children}
+            </Flag>
+          )}
         </ImageWrapper>
         <Spacer size={12} />
         <Row>
           <Name>{name}</Name>
-          <Price>{formatPrice(price)}</Price>
+          <PriceTag>{formatPrice(price)}</PriceTag>
         </Row>
         <Row>
-          <ColorInfo>{pluralize('Color', numOfColors)}</ColorInfo>
+          <ColorInfo>{pluralize("Color", numOfColors)}</ColorInfo>
+          {variant === "on-sale" && (
+            <SalePrice>{formatPrice(salePrice)}</SalePrice>
+          )}
         </Row>
       </Wrapper>
     </Link>
@@ -61,10 +82,31 @@ const ImageWrapper = styled.div`
   position: relative;
 `;
 
-const Image = styled.img``;
+const Flag = styled.div`
+  position: absolute;
+  background-color: ${(p) => p.bgcolor};
+  top: 12px;
+  right: -4px;
+  border-radius: 2px;
+  height: 32px;
+  align-items: center;
+  color: white;
+  line-height: 32px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 14px;
+  font-weight: ${WEIGHTS.bold};
+`;
+
+const Image = styled.img`
+  width: 100%;
+  border-radius: 16px 16px 4px 4px;
+`;
 
 const Row = styled.div`
   font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
 `;
 
 const Name = styled.h3`
@@ -73,6 +115,10 @@ const Name = styled.h3`
 `;
 
 const Price = styled.span``;
+const OldPrice = styled(Price)`
+  color: ${COLORS.gray[700]};
+  text-decoration: line-through;
+`;
 
 const ColorInfo = styled.p`
   color: ${COLORS.gray[700]};
